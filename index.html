@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="UTF-8"/>
+	<title>Title</title>
+
+	<style type="text/css">
+	span {
+		color: red;
+	}
+	#response {
+		color: green;
+	}
+	</style>
+
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script type="text/javascript">
+
+		var inputs = [
+			{ field: "name", validation: function(item) { return item.length == 0; }},
+			{ field: "lastName", validation: function(item) { return item.length == 0; }},
+			{ field: "email", validation: function(item) { var emailRegex = /\S+@\S+\.\S+/; return !emailRegex.test(item); }},
+			{ field: "phone", validation: function(item) { var phoneRegex = /[0-9]{10}/; return !phoneRegex.test(item); }},
+			{ field: "description", validation: function(item) { return false; }}
+		];
+
+		function callbackPost(res) {
+			if(res.success) {
+				$("#response").text("Sent");
+			}
+		}
+
+		function callbackButton(submitButton) {
+
+			submitButton.preventDefault();
+
+			var jsonObject = {};
+			inputs.forEach(function(item) {
+				jsonObject[item.field] = $("#" + item.field).val();
+			});
+
+			$("form > span").text("");
+
+			var correct = true;
+			inputs.forEach(function(item) {
+				if(item.validation($("#" + item.field).val())) {
+					correct = false;
+					$("#" + item.field + " + span").text("Invalid");
+				}
+			});
+
+			if(correct) {
+				$.post($("form").attr("action"), jsonObject, callbackPost);
+			}
+		}
+
+		$(document).ready(function() {
+			$("#send-button").click(callbackButton);
+		});
+	</script>
+</head>
+
+<!-- We could use the pattern attribute for input included in HTML 5 for recent browsers instead of making the validation with Javascript -->
+
+<form method="post" action="http://private-e2353-js8.apiary-mock.com/posttoform">
+	<input id="name" type="text" name="name" placeholder="First name"/><span></span><br />
+	<input id="lastName" type="text" name="lastName" placeholder="Last name"/><span></span><br />
+	<input id="email" type="email" name="email" placeholder="Email"/><span></span><br />
+	<input id="phone" type="tel" name="phone" placeholder="Phone number"/><span></span><br />
+	<textarea id="description" type="text" name="description" placeholder="Feedback"></textarea><br />
+
+	<input id="send-button" type="submit" value="Send"></input>
+</form>
+
+<div id="response"></div>
